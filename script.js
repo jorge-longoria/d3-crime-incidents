@@ -36,7 +36,7 @@ d3.json(source, function(data) {
       .append("g")
   .attr("transform", translate(margin.left, margin.top));
 
-  let x_values = tree.map( d => d.key.replace(" ", "\n") )
+  let x_values = tree.map(d => d.key.replace("/", "/~") )
     .filter( (d,i) => i <= 5 );
 
   let y_values = tree.map( d => d.value );
@@ -62,7 +62,7 @@ d3.json(source, function(data) {
   function wrap(text, width) {
     text.each(function() {
       var text = d3.select(this),
-          words = text.text().split(/\s+/).reverse(),
+          words = text.text().split(/\s+|\~/).reverse(),
           word,
           line = [],
           lineNumber = 0,
