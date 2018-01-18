@@ -36,6 +36,7 @@ d3.json(source, function(data) {
       .append("g")
   .attr("transform", translate(margin.left, margin.top));
 
+  //tilde is a dummy character.
   let x_values = tree.map(d => d.key.replace("/", "/~") )
     .filter( (d,i) => i <= 5 );
 
@@ -49,7 +50,7 @@ d3.json(source, function(data) {
 
   let y =
   d3.scaleLinear()
-    .domain( y_values ).nice()
+    .domain( d3.extent(y_values) ).nice()
     .rangeRound( [interiorHeight, 0] );
 
   svg.append("g")
@@ -58,6 +59,19 @@ d3.json(source, function(data) {
   .call(d3.axisBottom(x))
     .selectAll("text")
     .call(wrap, x.bandwidth());
+
+  svg.append("g")
+     .attr("class", "axis axis--y")
+   .call(d3.axisLeft(y).ticks( x_values.length ))
+   .append("text")
+     .attr("transform", "rotate(-90)")
+     .attr("y", 6)
+     .attr("dy", "0.71em")
+     .attr("text-anchor", "end")
+   .text("Axis Title")
+     .style("fill", "black")
+     .style("font-size", 10)
+  .style("font-family", "sans-serif");
 
   function wrap(text, width) {
     text.each(function() {
