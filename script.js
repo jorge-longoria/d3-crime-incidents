@@ -2,9 +2,10 @@ let source = "https://data.austintexas.gov/resource/rkrg-9tez.json";
 
 d3.json(source, function(data) {
   tree = d3.nest()
-    .key( d => d['crime_type'] ).sortKeys(d3.ascending)
+    .key( d => d['crime_type'] )
     .rollup( leaves => leaves.length )
-    .entries(data);
+    .entries(data)
+    .sort( (a,b) => d3.descending(a.value, b.value) );
 
   console.log(tree[0]);
 
@@ -38,9 +39,10 @@ d3.json(source, function(data) {
 
   //tilde is a dummy character.
   let x_values = tree.map(d => d.key.replace("/", "/~") )
-    .filter( (d,i) => i <= 5 );
+    .filter( (d,i) => i < 5 );
 
-  let y_values = tree.map( d => d.value );
+  let y_values = tree.map( d => d.value )
+    .filter( (d,i) => i < 5 );
 
   let x =
     d3.scaleBand()
@@ -50,7 +52,7 @@ d3.json(source, function(data) {
 
   let y =
   d3.scaleLinear()
-    .domain( d3.extent(y_values) ).nice()
+    .domain( [0, d3.max(y_values)] ).nice()
     .rangeRound( [interiorHeight, 0] );
 
   svg.append("g")
@@ -58,7 +60,7 @@ d3.json(source, function(data) {
     .attr("transform", translate(0, interiorHeight))
   .call(d3.axisBottom(x))
     .selectAll("text")
-    .call(wrap, x.bandwidth());
+  .call(wrap, x.bandwidth());
 
   svg.append("g")
      .attr("class", "axis axis--y")
@@ -72,6 +74,19 @@ d3.json(source, function(data) {
      .style("fill", "black")
      .style("font-size", 10)
   .style("font-family", "sans-serif");
+
+
+  svg.selectAll(".bar")
+      .data( y_values )
+   .enter().append("rect")
+     .attr("class", "bar")
+     .attr("x", (d,i) => x( x_values[i] ))
+     .attr("y", (d) => y(d))
+     .attr("width", x.bandwidth())
+     .attr("height", (d) => interiorHeight - y(d))
+     .attr("fill", "#05A")
+   .append("title")
+  .text((d) => d);
 
   function wrap(text, width) {
     text.each(function() {
